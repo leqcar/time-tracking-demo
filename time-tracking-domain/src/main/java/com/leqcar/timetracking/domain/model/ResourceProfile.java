@@ -1,8 +1,10 @@
 package com.leqcar.timetracking.domain.model;
 
+import com.leqcar.timetracking.api.timesheet.ResourceId;
+
 public class ResourceProfile {
 
-	private Long id;
+	private ResourceId resourceId;
 	
 	private String employeeId;
 	
@@ -16,15 +18,16 @@ public class ResourceProfile {
 	public ResourceProfile() {
 	}
 
-	public ResourceProfile(String employeeId, String name, String department, String managerApprover) {
+	public ResourceProfile(ResourceId resourceId, String employeeId, String name, String department, String managerApprover) {
+		this.resourceId = resourceId;
 		this.employeeId = employeeId;
 		this.name = name;
 		this.department = department;
 		this.managerApprover = managerApprover;
 	}
 
-	public Long getId() {
-		return id;
+	public ResourceId getResourceId() {
+		return resourceId;
 	}
 
 	public String getEmployeeId() {
@@ -45,8 +48,12 @@ public class ResourceProfile {
 
 	@Override
 	public String toString() {
-		return "ResourceProfile [id=" + id + ", employeeId=" + employeeId + ", name=" + name + ", department="
-				+ department + ", managerApprover=" + managerApprover + "]";
+		return "ResourceProfile{" +
+				"resourceId=" + resourceId +
+				", employeeId='" + employeeId + '\'' +
+				", name='" + name + '\'' +
+				", department='" + department + '\'' +
+				", managerApprover='" + managerApprover + '\'' +
+				'}';
 	}
-	
 }

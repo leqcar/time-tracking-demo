@@ -1,6 +1,9 @@
 package com.leqcar.timetracking;
 
 import com.leqcar.timetracking.api.timesheet.CreateTimeSheetCommand;
+import com.leqcar.timetracking.api.timesheet.ResourceId;
+import com.leqcar.timetracking.api.timesheet.TimePeriodId;
+import com.leqcar.timetracking.api.timesheet.TimeSheetId;
 import org.axonframework.commandhandling.CommandBus;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -25,7 +28,10 @@ public class TimeTrackingServiceApplication {
 	@Bean
 	CommandLineRunner dummyCreateClr() {
 		return args -> {
-			commandBus.dispatch(asCommandMessage(new CreateTimeSheetCommand("123", "Hello")));
+			commandBus.dispatch(asCommandMessage(new CreateTimeSheetCommand(new TimeSheetId()
+					, new TimePeriodId("2")
+					, new ResourceId("123456")
+					, "Hello")));
 		};
 	}
 }

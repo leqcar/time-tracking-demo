@@ -8,18 +8,18 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier;
 public class SubmitTimeSheetCommand {
 
     @TargetAggregateIdentifier
-    private String timeSheetId;
+    private TimeSheetId timeSheetId;
     private String note;
 
     public SubmitTimeSheetCommand() {
     }
 
-    public SubmitTimeSheetCommand(String timeSheetId, String note) {
+    public SubmitTimeSheetCommand(TimeSheetId timeSheetId, String note) {
         this.timeSheetId = timeSheetId;
         this.note = note;
     }
 
-    public String getTimeSheetId() {
+    public TimeSheetId getTimeSheetId() {
         return timeSheetId;
     }
 
@@ -27,11 +27,4 @@ public class SubmitTimeSheetCommand {
         return note;
     }
 
-    @Override
-    public String toString() {
-        return "SubmitTimeSheetCommand{" +
-                "timeSheetId='" + timeSheetId + '\'' +
-                ", note='" + note + '\'' +
-                '}';
-    }
 }

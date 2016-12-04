@@ -24,12 +24,14 @@ public class TimeSheetCommandHandler {
     public void handle(CreateTimeSheetCommand command) throws Exception {
         repository.newInstance(() ->
                 new TimeSheet(command.getTimeSheetId()
+                        , command.getTimePeriodId()
+                        , command.getResourceId()
                         , command.getNote()));
     }
 
     @CommandHandler
     public void handle(SubmitTimeSheetCommand command) throws Exception {
-        Aggregate<TimeSheet> timeSheetAggregate = repository.load(command.getTimeSheetId());
+        Aggregate<TimeSheet> timeSheetAggregate = repository.load(command.getTimeSheetId().toString());
         timeSheetAggregate.execute(timeSheet -> timeSheet.submit(command.getNote()));
     }
 }

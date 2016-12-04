@@ -5,17 +5,17 @@ package com.leqcar.timetracking.api.timesheet;
  */
 public class TimeSheetSubmittedEvent {
 
-    private String timeSheetId;
+    private TimeSheetId timeSheetId;
     private String note;
     private String status;
 
-    public TimeSheetSubmittedEvent(String timeSheetId, String note, String status) {
+    public TimeSheetSubmittedEvent(TimeSheetId timeSheetId, String note, String status) {
         this.timeSheetId = timeSheetId;
         this.note = note;
         this.status = status;
     }
 
-    public String getTimeSheetId() {
+    public TimeSheetId getTimeSheetId() {
         return timeSheetId;
     }
 

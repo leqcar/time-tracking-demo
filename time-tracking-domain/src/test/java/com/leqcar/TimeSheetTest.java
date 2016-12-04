@@ -1,9 +1,6 @@
 package com.leqcar;
 
-import com.leqcar.timetracking.api.timesheet.CreateTimeSheetCommand;
-import com.leqcar.timetracking.api.timesheet.SubmitTimeSheetCommand;
-import com.leqcar.timetracking.api.timesheet.TimeSheetCreatedEvent;
-import com.leqcar.timetracking.api.timesheet.TimeSheetSubmittedEvent;
+import com.leqcar.timetracking.api.timesheet.*;
 import com.leqcar.timetracking.domain.model.TimeSheet;
 import com.leqcar.timetracking.domain.model.TimeSheetCommandHandler;
 import org.axonframework.messaging.interceptors.BeanValidationInterceptor;
@@ -19,6 +16,10 @@ public class TimeSheetTest {
 
     private FixtureConfiguration<TimeSheet> fixture;
 
+    private TimeSheetId timeSheetId;
+    private TimePeriodId timePeriodId;
+    private ResourceId resourceId;
+
     @Before
     public void setup() {
         fixture = new AggregateTestFixture<>(TimeSheet.class);
@@ -26,20 +27,33 @@ public class TimeSheetTest {
                 fixture.getRepository(),
                 fixture.getEventBus()));
         fixture.registerCommandDispatchInterceptor(new BeanValidationInterceptor<>());
+
+        timeSheetId = new TimeSheetId();
+        timePeriodId = new TimePeriodId("2");
+        resourceId = new ResourceId("3333333");
     }
 
     @Test
     public void testTimeSheetCreate() {
         fixture.givenNoPriorActivity()
-                .when(new CreateTimeSheetCommand("123", "Hello"))
-                .expectEvents(new TimeSheetCreatedEvent("123", "Hello", "UNSUBMITTED"));
+                .when(new CreateTimeSheetCommand(timeSheetId
+                        , timePeriodId
+                        , resourceId
+                        , "Hello"))
+                .expectEvents(new TimeSheetCreatedEvent(timeSheetId
+                        , timePeriodId
+                        , resourceId
+                        , "Hello", "UNSUBMITTED"));
     }
 
     @Test
     public void testTimeSheetPendingApproval() {
-        fixture.given(new TimeSheetCreatedEvent("123", "Hello", "UNSUBMITTED"))
-                .when(new SubmitTimeSheetCommand("123", "Hello"))
-                .expectEvents(new TimeSheetSubmittedEvent("123", "Hello", "PENDING_APPROVAL"));
+        fixture.given(new TimeSheetCreatedEvent(timeSheetId
+                    , timePeriodId
+                    , resourceId
+                    , "Hello", "UNSUBMITTED"))
+                .when(new SubmitTimeSheetCommand(timeSheetId, "Hello"))
+                .expectEvents(new TimeSheetSubmittedEvent(timeSheetId, "Hello", "PENDING_APPROVAL"));
     }
 
 }

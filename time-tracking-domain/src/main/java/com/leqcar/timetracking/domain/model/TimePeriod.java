@@ -1,11 +1,15 @@
 package com.leqcar.timetracking.domain.model;
 
+import com.leqcar.timetracking.api.timesheet.TimePeriodId;
+import org.axonframework.spring.stereotype.Aggregate;
+
 import java.time.LocalDate;
 import java.util.List;
 
+@Aggregate
 public class TimePeriod {
 
-	private Long id;
+	private TimePeriodId timePeriodId;
 	
 	private LocalDate dateFrom;
 	
@@ -16,14 +20,15 @@ public class TimePeriod {
 	public TimePeriod() {
 	}
 
-	public TimePeriod(LocalDate dateFrom, LocalDate dateTo, List<Item> items) {
+	public TimePeriod(TimePeriodId timePeriodId, LocalDate dateFrom, LocalDate dateTo, List<Item> items) {
+		this.timePeriodId = timePeriodId;
 		this.dateFrom = dateFrom;
 		this.dateTo = dateTo;
 		this.items = items;
 	}
 
-	public Long getId() {
-		return id;
+	public TimePeriodId getTimePeriodId() {
+		return timePeriodId;
 	}
 
 	public LocalDate getDateFrom() {
@@ -40,7 +45,11 @@ public class TimePeriod {
 
 	@Override
 	public String toString() {
-		return "TimePeriod [id=" + id + ", dateFrom=" + dateFrom + ", dateTo=" + dateTo + ", items=" + items + "]";
+		return "TimePeriod{" +
+				"timePeriodId=" + timePeriodId +
+				", dateFrom=" + dateFrom +
+				", dateTo=" + dateTo +
+				", items=" + items +
+				'}';
 	}
-	
 }

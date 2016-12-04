@@ -1,8 +1,8 @@
 package com.leqcar.timetracking.domain.model;
 
-import com.leqcar.timetracking.api.timesheet.TimeSheetCreatedEvent;
-import com.leqcar.timetracking.api.timesheet.TimeSheetSubmittedEvent;
+import com.leqcar.timetracking.api.timesheet.*;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
+import org.axonframework.commandhandling.model.AggregateMember;
 import org.axonframework.commandhandling.model.AggregateRoot;
 import org.axonframework.eventhandling.EventHandler;
 
@@ -12,28 +12,30 @@ import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 public class TimeSheet {
 
 	@AggregateIdentifier
-	private String timeSheetId;
+	private TimeSheetId timeSheetId;
 
 	private String note;
 
+	@AggregateMember
 	private TimePeriod timePeriod;
 
-	private ResourceProfile resourcePerson;
+	@AggregateMember
+	private ResourceProfile resourceProfile;
 
 	private TimeSheetStatus timeSheetStatus;
 
 	public TimeSheet() {
 	}
 
-	public TimeSheet(String id, String note) {
-		apply(new TimeSheetCreatedEvent(id, note, TimeSheetStatus.UNSUBMITTED.toString()));
+	public TimeSheet(TimeSheetId timeSheetId, TimePeriodId timePeriodId, ResourceId resourceId, String note) {
+		apply(new TimeSheetCreatedEvent(timeSheetId, timePeriodId, resourceId, note, TimeSheetStatus.UNSUBMITTED.toString()));
 	}
 
 	@EventHandler
 	public void on(TimeSheetCreatedEvent event) {
 		this.timeSheetId  = event.getTimeSheetId();
-		this.note = event.getNote();
 		this.timeSheetStatus = TimeSheetStatus.UNSUBMITTED;
+		this.note = event.getNote();
 	}
 
 	public void submit(String note) {
@@ -46,7 +48,7 @@ public class TimeSheet {
 		this.timeSheetStatus = TimeSheetStatus.PENDING_APPROVAL;
 	}
 
-	public String getTimeSheetId() {
+	public TimeSheetId getTimeSheetId() {
 		return timeSheetId;
 	}
 
@@ -58,8 +60,8 @@ public class TimeSheet {
 		return timePeriod;
 	}
 
-	public ResourceProfile getResourcePerson() {
-		return resourcePerson;
+	public ResourceProfile getResourceProfile() {
+		return resourceProfile;
 	}
 
 	public TimeSheetStatus getTimeSheetStatus() {
@@ -68,8 +70,12 @@ public class TimeSheet {
 
 	@Override
 	public String toString() {
-		return "TimeSheet [timeSheetId=" + timeSheetId + ", note=" + note + ", timePeriod=" + timePeriod + ", resourcePerson="
-				+ resourcePerson + ", timeSheetStatus=" + timeSheetStatus + "]";
+		return "TimeSheet{" +
+				"timeSheetId='" + timeSheetId + '\'' +
+				", note='" + note + '\'' +
+				", timePeriod=" + timePeriod +
+				", resourceProfile=" + resourceProfile +
+				", timeSheetStatus=" + timeSheetStatus +
+				'}';
 	}
-
 }
