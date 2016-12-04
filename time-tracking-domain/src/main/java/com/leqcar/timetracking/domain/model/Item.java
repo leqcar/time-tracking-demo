@@ -2,23 +2,9 @@ package com.leqcar.timetracking.domain.model;
 
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-
 // This class holds different type of projects, request, miscellaneous etc..
-@Entity
 public class Item {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
 	private String code;
@@ -39,14 +25,11 @@ public class Item {
 		this.timeEntries = timeEntries;
 	}
 
-	@Enumerated(EnumType.STRING)
 	private ItemType itemType;
 	
 	public Item() {
 	}
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn
 	private List<TimeEntry> timeEntries;
 
 	public Long getId() {

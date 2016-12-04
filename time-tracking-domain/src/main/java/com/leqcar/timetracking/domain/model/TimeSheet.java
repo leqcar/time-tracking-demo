@@ -1,49 +1,53 @@
 package com.leqcar.timetracking.domain.model;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import com.leqcar.timetracking.api.timesheet.TimeSheetCreatedEvent;
+import com.leqcar.timetracking.api.timesheet.TimeSheetSubmittedEvent;
+import org.axonframework.commandhandling.model.AggregateIdentifier;
+import org.axonframework.commandhandling.model.AggregateRoot;
+import org.axonframework.eventhandling.EventHandler;
 
-@Entity
+import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
+
+@AggregateRoot
 public class TimeSheet {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
+	@AggregateIdentifier
+	private String timeSheetId;
+
 	private String note;
-	
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn
+
 	private TimePeriod timePeriod;
-	
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn
+
 	private ResourceProfile resourcePerson;
-	
-	@Enumerated(EnumType.STRING)
+
 	private TimeSheetStatus timeSheetStatus;
 
 	public TimeSheet() {
 	}
 
-	public TimeSheet(String note, TimePeriod timePeriod, ResourceProfile resourcePerson,
-			TimeSheetStatus timeSheetStatus) {
-		this.note = note;
-		this.timePeriod = timePeriod;
-		this.resourcePerson = resourcePerson;
-		this.timeSheetStatus = timeSheetStatus;
+	public TimeSheet(String id, String note) {
+		apply(new TimeSheetCreatedEvent(id, note, TimeSheetStatus.UNSUBMITTED.toString()));
 	}
 
-	public Long getId() {
-		return id;
+	@EventHandler
+	public void on(TimeSheetCreatedEvent event) {
+		this.timeSheetId  = event.getTimeSheetId();
+		this.note = event.getNote();
+		this.timeSheetStatus = TimeSheetStatus.UNSUBMITTED;
+	}
+
+	public void submit(String note) {
+		apply(new TimeSheetSubmittedEvent(timeSheetId, note, TimeSheetStatus.PENDING_APPROVAL.toString()));
+	}
+
+	@EventHandler
+	public void on(TimeSheetSubmittedEvent event) {
+		this.note = event.getNote();
+		this.timeSheetStatus = TimeSheetStatus.PENDING_APPROVAL;
+	}
+
+	public String getTimeSheetId() {
+		return timeSheetId;
 	}
 
 	public String getNote() {
@@ -64,8 +68,8 @@ public class TimeSheet {
 
 	@Override
 	public String toString() {
-		return "TimeSheet [id=" + id + ", note=" + note + ", timePeriod=" + timePeriod + ", resourcePerson="
+		return "TimeSheet [timeSheetId=" + timeSheetId + ", note=" + note + ", timePeriod=" + timePeriod + ", resourcePerson="
 				+ resourcePerson + ", timeSheetStatus=" + timeSheetStatus + "]";
 	}
-	
+
 }
