@@ -29,6 +29,7 @@
 		<module>time-tracking-service</module>
 		<module>time-tracking-domain</module>
 		<module>time-tracking-command</module>
+		<module>time-tracking-query</module>
 	</modules>
 	
     <build>

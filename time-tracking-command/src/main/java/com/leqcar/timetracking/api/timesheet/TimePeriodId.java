@@ -7,7 +7,9 @@ import java.io.Serializable;
  */
 public class TimePeriodId implements Serializable {
 
-    private String id;
+	private static final long serialVersionUID = 691332902980363975L;
+	
+	private String id;
 
     public TimePeriodId(String id) {
         this.id = id;

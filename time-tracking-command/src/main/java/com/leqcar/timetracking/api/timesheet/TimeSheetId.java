@@ -9,7 +9,9 @@ import java.io.Serializable;
  */
 public class TimeSheetId implements Serializable {
 
-    private String id;
+	private static final long serialVersionUID = 1997185323606530719L;
+	
+	private String id;
 
     public TimeSheetId(String id) {
         this.id = id;

@@ -7,7 +7,9 @@ import java.io.Serializable;
  */
 public class ResourceId implements Serializable {
 
-    private String id;
+	private static final long serialVersionUID = 3859464173747310589L;
+	
+	private String id;
 
     public ResourceId(String id) {
         this.id = id;
