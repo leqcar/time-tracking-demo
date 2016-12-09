@@ -1,8 +1,8 @@
 package com.leqcar.timetracking.api.timesheet;
 
-import org.axonframework.common.IdentifierFactory;
-
 import java.io.Serializable;
+
+import org.axonframework.common.IdentifierFactory;
 
 /**
  * Created by jongtenerife on 05/12/2016.
@@ -10,14 +10,18 @@ import java.io.Serializable;
 public class TimeSheetId implements Serializable {
 
 	private static final long serialVersionUID = 1997185323606530719L;
-	
+
 	private String id;
 
     public TimeSheetId(String id) {
         this.id = id;
     }
 
-    public TimeSheetId() {
+    public String getId() {
+		return id;
+	}
+
+	public TimeSheetId() {
         this.id = IdentifierFactory.getInstance().generateIdentifier();
     }
 

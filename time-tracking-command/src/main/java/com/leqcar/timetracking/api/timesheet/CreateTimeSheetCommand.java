@@ -1,13 +1,10 @@
 package com.leqcar.timetracking.api.timesheet;
 
-import org.axonframework.commandhandling.TargetAggregateIdentifier;
-
 /**
  * Created by jongtenerife on 04/12/2016.
  */
 public class CreateTimeSheetCommand {
 
-    @TargetAggregateIdentifier
     private TimeSheetId timeSheetId;
     private String note;
     private TimePeriodId timePeriodId;

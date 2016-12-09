@@ -5,7 +5,7 @@ import java.util.List;
 // This class holds different type of projects, request, miscellaneous etc..
 public class Item {
 
-	private Long id;
+	private String itemId;
 	
 	private String code;
 	
@@ -13,27 +13,29 @@ public class Item {
 	
 	private Status status;
 	
+	private ItemType itemType;
+	
+	private List<TimeEntry> timeEntries;
+	
 	private String note;
 	
-	public Item(String code, String description, Status status, String note, ItemType itemType,
-			List<TimeEntry> timeEntries) {
-		this.code = code;
-		this.description = description;
-		this.status = status;
-		this.note = note;
-		this.itemType = itemType;
-		this.timeEntries = timeEntries;
-	}
-
-	private ItemType itemType;
 	
 	public Item() {
 	}
 
-	private List<TimeEntry> timeEntries;
+	public Item(String itemId, String code, String description, Status status, ItemType itemType,
+			List<TimeEntry> timeEntries, String note) {
+		this.itemId = itemId;
+		this.code = code;
+		this.description = description;
+		this.status = status;
+		this.itemType = itemType;
+		this.timeEntries = timeEntries;
+		this.note = note;
+	}
 
-	public Long getId() {
-		return id;
+	public String getItemId() {
+		return itemId;
 	}
 
 	public String getCode() {
@@ -62,7 +64,7 @@ public class Item {
 
 	@Override
 	public String toString() {
-		return "Item [id=" + id + ", code=" + code + ", description=" + description + ", status=" + status + ", note="
-				+ note + ", itemType=" + itemType + ", timeEntries=" + timeEntries + "]";
-	}	
+		return "Item [itemId=" + itemId + ", code=" + code + ", description=" + description + ", status=" + status
+				+ ", itemType=" + itemType + ", timeEntries=" + timeEntries + ", note=" + note + "]";
+	}
 }

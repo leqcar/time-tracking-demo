@@ -8,8 +8,9 @@ import javax.persistence.Id;
 public class TimeSheetEntry  {
 
 	@Id
-	private String id;
+	private String timeSheetId;
 	
+	@Embedded
 	private TimeSheetPeriodEntry timeSheetPeriodEntry;
 
 	@Embedded
@@ -19,7 +20,34 @@ public class TimeSheetEntry  {
 
 	public TimeSheetEntry() {
 	}
-	
-	
-	
+
+	public TimeSheetEntry(String timeSheetId, TimeSheetPeriodEntry timeSheetPeriodEntry, Resource resource,
+			String note) {
+		this.timeSheetId = timeSheetId;
+		this.timeSheetPeriodEntry = timeSheetPeriodEntry;
+		this.resource = resource;
+		this.note = note;
+	}
+
+	public String getTimeSheetId() {
+		return timeSheetId;
+	}
+
+	public TimeSheetPeriodEntry getTimeSheetPeriodEntry() {
+		return timeSheetPeriodEntry;
+	}
+
+	public Resource getResource() {
+		return resource;
+	}
+
+	public String getNote() {
+		return note;
+	}
+
+	@Override
+	public String toString() {
+		return "TimeSheetEntry [timeSheetId=" + timeSheetId + ", timeSheetPeriodEntry=" + timeSheetPeriodEntry
+				+ ", resource=" + resource + ", note=" + note + "]";
+	}
 }
