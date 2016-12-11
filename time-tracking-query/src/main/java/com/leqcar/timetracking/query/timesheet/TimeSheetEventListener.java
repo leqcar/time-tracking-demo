@@ -1,5 +1,6 @@
 package com.leqcar.timetracking.query.timesheet;
 
+import com.leqcar.timetracking.api.timesheet.TimeSheetSubmittedEvent;
 import org.axonframework.eventhandling.EventHandler;
 import org.springframework.stereotype.Component;
 
@@ -38,5 +39,10 @@ public class TimeSheetEventListener {
 				, timeSheetPeriodEntry
 				, resource
 				, event.getNote()));
+	}
+
+	@EventHandler
+	public void on(TimeSheetSubmittedEvent event) {
+		System.out.println(event);
 	}
 }

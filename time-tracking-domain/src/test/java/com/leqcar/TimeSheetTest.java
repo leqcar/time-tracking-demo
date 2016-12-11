@@ -1,31 +1,22 @@
 package com.leqcar;
 
+import com.leqcar.timetracking.api.timesheet.*;
+import com.leqcar.timetracking.api.timesheet.ItemCommand;
+import com.leqcar.timetracking.domain.model.*;
+import org.axonframework.test.aggregate.AggregateTestFixture;
+import org.axonframework.test.aggregate.FixtureConfiguration;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.axonframework.test.aggregate.AggregateTestFixture;
-import org.axonframework.test.aggregate.FixtureConfiguration;
-import org.hibernate.transform.ToListResultTransformer;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.leqcar.timetracking.api.timesheet.CreateTimeSheetCommand;
-import com.leqcar.timetracking.api.timesheet.Item;
-import com.leqcar.timetracking.api.timesheet.ItemDetail;
-import com.leqcar.timetracking.api.timesheet.ResourceId;
-import com.leqcar.timetracking.api.timesheet.SubmitTimeSheetCommand;
-import com.leqcar.timetracking.api.timesheet.TimePeriodId;
-import com.leqcar.timetracking.api.timesheet.TimeSheetCreatedEvent;
-import com.leqcar.timetracking.api.timesheet.TimeSheetId;
-import com.leqcar.timetracking.api.timesheet.TimeSheetSubmittedEvent;
-import com.leqcar.timetracking.domain.model.NoItemEntryException;
-import com.leqcar.timetracking.domain.model.TimeSheet;
 
 /**
  * Created by jongtenerife on 04/12/2016.
@@ -70,14 +61,14 @@ public class TimeSheetTest {
                 		resourceId, 
                 		Collections.emptyList(), 
                 		"Hello"))
-                .expectException(NoItemEntryException.class);
+                .expectException(IllegalArgumentException.class);
     }
     
     @Test
     public void testTimeSheetPendingApprovalBelowMinimumTotalHours() {
-    	ItemDetail seed = new ItemDetail(LocalDate.now().with(ChronoField.DAY_OF_WEEK, 1), 1);
+    	ItemDetail seed = new ItemDetail(UUID.randomUUID().toString(), LocalDate.now().with(ChronoField.DAY_OF_WEEK, 1), 1);
 		List<ItemDetail> itemDetail = Stream.iterate(seed, n -> {
-					ItemDetail next = new ItemDetail(n.getDatePeriod().plus(1, ChronoUnit.DAYS), n.getNoOfHours());
+					ItemDetail next = new ItemDetail(n.getId(), n.getDatePeriod().plus(1, ChronoUnit.DAYS), n.getNoOfHours());
 					return next;
 				})
     			.limit(7)
@@ -90,16 +81,16 @@ public class TimeSheetTest {
             .when(new SubmitTimeSheetCommand(timeSheetId, 
             		timePeriodId, 
             		resourceId, 
-            		Arrays.asList(new Item("itemCode", "itemDesc", itemDetail)), 
+            		Arrays.asList(new ItemCommand("itemCode", "itemDesc", itemDetail, null, null)),
             		"Hello"))
             .expectException(IllegalStateException.class);
     }
     
     @Test
     public void testTimeSheetPendingApprovalAboveMaximumTotalHours() {
-    	ItemDetail seed = new ItemDetail(LocalDate.now().with(ChronoField.DAY_OF_WEEK, 1), 50);
+    	ItemDetail seed = new ItemDetail(UUID.randomUUID().toString(), LocalDate.now().with(ChronoField.DAY_OF_WEEK, 1), 50);
 		List<ItemDetail> itemDetail = Stream.iterate(seed, n -> {
-					return new ItemDetail(n.getDatePeriod().plus(1, ChronoUnit.DAYS), n.getNoOfHours());
+					return new ItemDetail(n.getId(), n.getDatePeriod().plus(1, ChronoUnit.DAYS), n.getNoOfHours());
 				})
     			.limit(7)
     			.collect(Collectors.toList());
@@ -111,32 +102,67 @@ public class TimeSheetTest {
             .when(new SubmitTimeSheetCommand(timeSheetId, 
             		timePeriodId, 
             		resourceId, 
-            		Arrays.asList(new Item("itemCode", "itemDesc", itemDetail)), 
+            		Arrays.asList(new ItemCommand("itemCode", "itemDesc", itemDetail, null, null)),
             		"Hello"))
             .expectException(IllegalStateException.class);
     }
     
     @Test
-    public void testTimeSheetPendingApproval() {
-    	ItemDetail seed = new ItemDetail(LocalDate.now().with(ChronoField.DAY_OF_WEEK, 1), 8);
-		List<ItemDetail> itemDetail = Stream.iterate(seed, n -> {
-					return new ItemDetail(n.getDatePeriod().plus(1, ChronoUnit.DAYS), n.getNoOfHours());
+    public void testTimeSheetPendingApprovalSubmitted() {
+    	ItemDetail seed = new ItemDetail(UUID.randomUUID().toString(), LocalDate.now().with(ChronoField.DAY_OF_WEEK, 1), 8);
+		List<ItemDetail> itemDetails = Stream.iterate(seed, n -> {
+					return new ItemDetail(n.getId(), n.getDatePeriod().plus(1, ChronoUnit.DAYS), n.getNoOfHours());
 				})
     			.limit(7)
     			.collect(Collectors.toList());
 
-    			
-        fixture.given(new TimeSheetCreatedEvent(timeSheetId
+		List<ItemCommand> itemCommands = Arrays.asList(new ItemCommand("itemCode",
+				"itemDesc",
+				itemDetails,
+				null,
+				null));
+
+		fixture.given(new TimeSheetCreatedEvent(timeSheetId
                     , timePeriodId
                     , resourceId
                     , "Hello", "UNSUBMITTED"))
                 .when(new SubmitTimeSheetCommand(timeSheetId, 
                 		timePeriodId, 
-                		resourceId, 
-                		Arrays.asList(new Item("itemCode", "itemDesc", itemDetail)), 
+                		resourceId,
+						itemCommands,
                 		"Hello"))
-                .expectEvents(new TimeSheetSubmittedEvent(timeSheetId, "Hello", "PENDING_APPROVAL"));
+                .expectEvents(new TimeSheetSubmittedEvent(timeSheetId, "Hello", "PENDING_APPROVAL", itemCommands));
     }
     
+	@Test
+	public void testTimeSheetPendingApprovalWithTwoItemsSubmitted() {
+		ItemDetail seed = new ItemDetail(UUID.randomUUID().toString(), LocalDate.now().with(ChronoField.DAY_OF_WEEK, 1), 8);
+		List<ItemDetail> taskItemDetails = Stream.iterate(seed, n -> {
+			return new ItemDetail(n.getId(), n.getDatePeriod().plus(1, ChronoUnit.DAYS), n.getNoOfHours());
+		})
+				.limit(3)
+				.collect(Collectors.toList());
 
+		ItemDetail nextSeed = new ItemDetail(UUID.randomUUID().toString(), LocalDate.now().with(ChronoField.DAY_OF_WEEK, 4), 8);
+		List<ItemDetail> vlItemDetails = Stream.iterate(nextSeed , n -> {
+			return new ItemDetail(n.getId(), n.getDatePeriod().plus(1, ChronoUnit.DAYS), n.getNoOfHours());
+		})
+				.limit(2)
+				.collect(Collectors.toList());
+
+		List<ItemCommand> items = Arrays.asList(new ItemCommand("itemTask", "itemTaskDescription", taskItemDetails, null, null),
+				new ItemCommand("itemVL","itemVLDescription", vlItemDetails, null, null));
+
+		fixture.given(new TimeSheetCreatedEvent(timeSheetId
+				, timePeriodId
+				, resourceId
+				, "Hello", "UNSUBMITTED"))
+				.when(new SubmitTimeSheetCommand(timeSheetId,
+						timePeriodId,
+						resourceId,
+						items,
+						"Hello"))
+				.expectEvents(new TimeSheetSubmittedEvent(timeSheetId, "Hello", "PENDING_APPROVAL", items));
+
+	}
 }

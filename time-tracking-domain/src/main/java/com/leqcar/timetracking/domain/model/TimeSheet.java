@@ -1,21 +1,17 @@
 package com.leqcar.timetracking.domain.model;
 
-import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
-
-import java.util.List;
-
+import com.leqcar.timetracking.api.timesheet.*;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
+import org.axonframework.commandhandling.model.AggregateMember;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
 
-import com.leqcar.timetracking.api.timesheet.CreateTimeSheetCommand;
-import com.leqcar.timetracking.api.timesheet.ResourceId;
-import com.leqcar.timetracking.api.timesheet.SubmitTimeSheetCommand;
-import com.leqcar.timetracking.api.timesheet.TimePeriodId;
-import com.leqcar.timetracking.api.timesheet.TimeSheetCreatedEvent;
-import com.leqcar.timetracking.api.timesheet.TimeSheetId;
-import com.leqcar.timetracking.api.timesheet.TimeSheetSubmittedEvent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
 @Aggregate
 public class TimeSheet {
@@ -29,7 +25,8 @@ public class TimeSheet {
 
 	private ResourceId resourceId;
 
-	private List<Item> itemEntries;
+	@AggregateMember
+	private List<Item> itemEntries = new ArrayList<>();
 	
 	private TimeSheetStatus timeSheetStatus;
 
@@ -61,17 +58,39 @@ public class TimeSheet {
 	@CommandHandler
 	public void submit(SubmitTimeSheetCommand cmd) {
 		if (cmd.getItemEntries().size() <= 0) {
-			throw new NoItemEntryException("Atleast one(1) item entry expected");
+			throw new IllegalArgumentException("Atleast one(1) item entry expected");
 		}
 		
 		Integer totalHours = calculateTotalHours(cmd);
 		if (!isWithinValidNoOfHours(totalHours)) {
 			throw new IllegalStateException("Total no. of hours is not within the specified min or max limit");		
-		} 
+		}
 		apply(new TimeSheetSubmittedEvent(cmd.getTimeSheetId(), 
 				cmd.getNote(), 
-				TimeSheetStatus.PENDING_APPROVAL.toString()));
+				TimeSheetStatus.PENDING_APPROVAL.toString(),
+				cmd.getItemEntries()));
 						
+	}
+
+	private void addItemTimeEntries(List<ItemCommand> itemCommands) {
+		if (this.itemEntries == null) {
+			itemEntries = new ArrayList<>();
+		}
+		itemCommands.forEach(item -> {
+			List<TimeEntry> timeEntries = item.getItemDetails().stream()
+					.map(d -> {
+						return new TimeEntry(d.getId(), d.getDatePeriod(), d.getNoOfHours());
+					})
+					.collect(Collectors.toList());
+
+			itemEntries.add(new Item(timeSheetId.toString(),
+					item.getItemCode(),
+					item.getItemDescription(),
+					null,
+					null,
+					timeEntries,
+					item.getNote()));
+		});
 	}
 
 	private boolean isWithinValidNoOfHours(Integer totalHours) {
@@ -88,6 +107,7 @@ public class TimeSheet {
 
 	@EventSourcingHandler
 	public void on(TimeSheetSubmittedEvent event) {
+		addItemTimeEntries(event.getItemCommands());
 		this.note = event.getNote();
 		this.timeSheetStatus = TimeSheetStatus.PENDING_APPROVAL;
 	}
@@ -119,11 +139,41 @@ public class TimeSheet {
 	@Override
 	public String toString() {
 		return "TimeSheet{" +
-				"timeSheetId='" + timeSheetId + '\'' +
+				"timeSheetId=" + timeSheetId +
 				", note='" + note + '\'' +
 				", timePeriodId=" + timePeriodId +
 				", resourceId=" + resourceId +
+				", itemEntries=" + itemEntries +
 				", timeSheetStatus=" + timeSheetStatus +
 				'}';
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		TimeSheet timeSheet = (TimeSheet) o;
+
+		if (timeSheetId != null ? !timeSheetId.equals(timeSheet.timeSheetId) : timeSheet.timeSheetId != null)
+			return false;
+		if (note != null ? !note.equals(timeSheet.note) : timeSheet.note != null) return false;
+		if (timePeriodId != null ? !timePeriodId.equals(timeSheet.timePeriodId) : timeSheet.timePeriodId != null)
+			return false;
+		if (resourceId != null ? !resourceId.equals(timeSheet.resourceId) : timeSheet.resourceId != null) return false;
+		if (itemEntries != null ? !itemEntries.equals(timeSheet.itemEntries) : timeSheet.itemEntries != null)
+			return false;
+		return timeSheetStatus == timeSheet.timeSheetStatus;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = timeSheetId != null ? timeSheetId.hashCode() : 0;
+		result = 31 * result + (note != null ? note.hashCode() : 0);
+		result = 31 * result + (timePeriodId != null ? timePeriodId.hashCode() : 0);
+		result = 31 * result + (resourceId != null ? resourceId.hashCode() : 0);
+		result = 31 * result + (itemEntries != null ? itemEntries.hashCode() : 0);
+		result = 31 * result + (timeSheetStatus != null ? timeSheetStatus.hashCode() : 0);
+		return result;
 	}
 }
