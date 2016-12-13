@@ -7,6 +7,8 @@ import java.time.LocalDate;
 
 public class TimeEntry {
 
+	private static final int HRS_PER_DAY_LIMIT = Integer.parseInt("17");
+
 	@EntityId
 	private String id;
 		
@@ -41,6 +43,10 @@ public class TimeEntry {
 		return dayOfWeek;
 	}
 
+	public boolean exceedsDayHoursLimit() {
+		return this.hours.compareTo(HRS_PER_DAY_LIMIT) > 0 ? true : false;
+	}
+	
 	@Override
 	public String toString() {
 		return "TimeEntry{" +

@@ -1,11 +1,11 @@
-package com.leqcar.timetracking.resource;
+package com.leqcar.timetracking.dtos;
 
 import java.time.LocalDate;
 
 /**
  * Created by jongtenerife on 10/12/2016.
  */
-public class ItemDetailVO {
+public class ItemDetailDTO {
 
     private String id;
     private LocalDate datePeriod;

@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Embeddable;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
@@ -18,13 +20,18 @@ public class TimeSheetPeriodEntry {
 	@JoinColumn
 	private List<ItemEntry> itemEntries;
 	
+	@Enumerated(EnumType.STRING)
+	private StatusId statusId;
+	
 	public TimeSheetPeriodEntry() {
 	}
 
-	public TimeSheetPeriodEntry(String timePeriodId, String timePeriodDate, List<ItemEntry> itemEntries) {
+	public TimeSheetPeriodEntry(String timePeriodId, String timePeriodDate, List<ItemEntry> itemEntries,
+			StatusId statusId) {
 		this.timePeriodId = timePeriodId;
 		this.timePeriodDate = timePeriodDate;
 		this.itemEntries = itemEntries;
+		this.statusId = statusId;
 	}
 
 	public String getTimePeriodId() {
@@ -39,10 +46,14 @@ public class TimeSheetPeriodEntry {
 		return itemEntries;
 	}
 
+	public StatusId getStatusId() {
+		return statusId;
+	}
+
 	@Override
 	public String toString() {
 		return "TimeSheetPeriodEntry [timePeriodId=" + timePeriodId + ", timePeriodDate=" + timePeriodDate
-				+ ", itemEntries=" + itemEntries + "]";
+				+ ", itemEntries=" + itemEntries + ", statusId=" + statusId + "]";
 	}
-	
+
 }

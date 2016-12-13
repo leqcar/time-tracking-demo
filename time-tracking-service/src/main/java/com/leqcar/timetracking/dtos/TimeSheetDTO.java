@@ -1,18 +1,20 @@
-package com.leqcar.timetracking.resource;
+package com.leqcar.timetracking.dtos;
 
 import java.util.List;
+
+import com.leqcar.timetracking.dtos.ItemDTO;
 
 /**
  * Created by jongtenerife on 10/12/2016.
  */
-public class TimeSheetVO {
+public class TimeSheetDTO {
 
     private String timeSheetId;
     private String timePeriodId;
     private String resourceId;
     private String note;
 
-    private List<ItemVO> itemVOs;
+    private List<ItemDTO> itemVOs;
 
     public String getTimeSheetId() {
         return timeSheetId;
@@ -42,11 +44,11 @@ public class TimeSheetVO {
         this.note = note;
     }
 
-    public List<ItemVO> getItemVOs() {
+    public List<ItemDTO> getItemVOs() {
         return itemVOs;
     }
 
-    public void setItemVOs(List<ItemVO> itemVOs) {
+    public void setItemVOs(List<ItemDTO> itemVOs) {
         this.itemVOs = itemVOs;
     }
 }

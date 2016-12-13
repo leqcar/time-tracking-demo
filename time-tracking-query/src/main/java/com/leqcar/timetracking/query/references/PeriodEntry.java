@@ -11,9 +11,13 @@ public class PeriodEntry extends ReferenceEntry{
 		super();
 	}
 	
-	public PeriodEntry(String id, String description, LocalDate effectiveDate) {
-		super(id, description, effectiveDate);
+	public PeriodEntry(String description, LocalDate effectiveDate) {
+		super(description, effectiveDate);
 	}
 
-
+	@Override
+	public String toString() {
+		return "PeriodEntry [getId()=" + getId() + ", getDescription()=" + getDescription() + ", getEffectiveDate()="
+				+ getEffectiveDate() + "]";
+	}
 }

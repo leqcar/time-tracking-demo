@@ -2,6 +2,8 @@ package com.leqcar.timetracking.api.timesheet;
 
 import java.io.Serializable;
 
+import org.springframework.util.Assert;
+
 /**
  * Created by jongtenerife on 05/12/2016.
  */
@@ -29,6 +31,11 @@ public class TimePeriodId implements Serializable {
         return id != null ? id.equals(that.id) : that.id == null;
     }
 
+	public String previousTimePeriodId() {
+		Assert.notNull(this.id, "Id must not be null");
+		return String.valueOf(Integer.parseInt(this.id) - 1);
+	}
+	
     @Override
     public int hashCode() {
         return id != null ? id.hashCode() : 0;

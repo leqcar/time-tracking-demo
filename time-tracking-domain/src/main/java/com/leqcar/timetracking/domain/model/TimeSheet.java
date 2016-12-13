@@ -38,7 +38,6 @@ public class TimeSheet {
 
 	@CommandHandler
 	public TimeSheet(CreateTimeSheetCommand cmd) {
-		
 		apply(new TimeSheetCreatedEvent(cmd.getTimeSheetId(), 
 				cmd.getTimePeriodId(), 
 				cmd.getResourceId(), 
@@ -100,7 +99,12 @@ public class TimeSheet {
 	private Integer calculateTotalHours(SubmitTimeSheetCommand cmd) {
 		return cmd.getItemEntries().stream()
 				.mapToInt(item -> item.getItemDetails().stream()
-						.map(itemDetail -> itemDetail.getNoOfHours())
+						.map(itemDetail -> {
+							if (itemDetail.exceedsDayHoursLimit()) {
+								throw new IllegalArgumentException("Your work effort per day has exceeded!");
+							}
+							return itemDetail.getNoOfHours();
+						})
 						.reduce(0, (x,y) -> x + y))
 				.sum();
 	}

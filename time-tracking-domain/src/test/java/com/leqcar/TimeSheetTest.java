@@ -1,12 +1,6 @@
 package com.leqcar;
 
-import com.leqcar.timetracking.api.timesheet.*;
-import com.leqcar.timetracking.api.timesheet.ItemCommand;
-import com.leqcar.timetracking.domain.model.*;
-import org.axonframework.test.aggregate.AggregateTestFixture;
-import org.axonframework.test.aggregate.FixtureConfiguration;
-import org.junit.Before;
-import org.junit.Test;
+import static java.util.stream.Collectors.toList;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
@@ -17,6 +11,26 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.axonframework.test.aggregate.AggregateTestFixture;
+import org.axonframework.test.aggregate.FixtureConfiguration;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import com.leqcar.timetracking.api.timesheet.CreateTimeSheetCommand;
+import com.leqcar.timetracking.api.timesheet.ItemCommand;
+import com.leqcar.timetracking.api.timesheet.ItemDetail;
+import com.leqcar.timetracking.api.timesheet.ResourceId;
+import com.leqcar.timetracking.api.timesheet.SubmitTimeSheetCommand;
+import com.leqcar.timetracking.api.timesheet.TimePeriodId;
+import com.leqcar.timetracking.api.timesheet.TimeSheetCreatedEvent;
+import com.leqcar.timetracking.api.timesheet.TimeSheetId;
+import com.leqcar.timetracking.api.timesheet.TimeSheetSubmittedEvent;
+import com.leqcar.timetracking.domain.model.TimeSheet;
 
 /**
  * Created by jongtenerife on 04/12/2016.
@@ -88,12 +102,14 @@ public class TimeSheetTest {
     
     @Test
     public void testTimeSheetPendingApprovalAboveMaximumTotalHours() {
-    	ItemDetail seed = new ItemDetail(UUID.randomUUID().toString(), LocalDate.now().with(ChronoField.DAY_OF_WEEK, 1), 50);
+    	ItemDetail seed = new ItemDetail(UUID.randomUUID().toString(), LocalDate.now().with(ChronoField.DAY_OF_WEEK, 1), 17);
 		List<ItemDetail> itemDetail = Stream.iterate(seed, n -> {
 					return new ItemDetail(n.getId(), n.getDatePeriod().plus(1, ChronoUnit.DAYS), n.getNoOfHours());
 				})
     			.limit(7)
-    			.collect(Collectors.toList());
+    			.collect(toList());
+
+		ItemCommand itemCommand = new ItemCommand("itemCode", "itemDesc", itemDetail, null, null);
 
         fixture.given(new TimeSheetCreatedEvent(timeSheetId
                 , timePeriodId
@@ -102,10 +118,34 @@ public class TimeSheetTest {
             .when(new SubmitTimeSheetCommand(timeSheetId, 
             		timePeriodId, 
             		resourceId, 
-            		Arrays.asList(new ItemCommand("itemCode", "itemDesc", itemDetail, null, null)),
+            		Stream.iterate(itemCommand, n -> n).limit(5).collect(toList()),
             		"Hello"))
             .expectException(IllegalStateException.class);
     }
+    
+    @Test
+    public void testWithAnExceededPerDayHoursShouldReturnException() {
+    	ItemDetail seed = new ItemDetail(UUID.randomUUID().toString(), LocalDate.now().with(ChronoField.DAY_OF_WEEK, 1), 25);
+		List<ItemDetail> itemDetail = Stream.iterate(seed, n -> {
+			return new ItemDetail(n.getId(), n.getDatePeriod().plus(1, ChronoUnit.DAYS), n.getNoOfHours());
+		})
+		.limit(1)
+		.collect(toList());
+		
+		ItemCommand itemCommand = new ItemCommand("itemCode", "itemDesc", itemDetail, null, null);
+
+        fixture.given(new TimeSheetCreatedEvent(timeSheetId
+                , timePeriodId
+                , resourceId
+                , "Hello", "UNSUBMITTED"))
+            .when(new SubmitTimeSheetCommand(timeSheetId, 
+            		timePeriodId, 
+            		resourceId, 
+            		Stream.iterate(itemCommand, n -> n).limit(5).collect(toList()),
+            		"Hello"))
+            .expectException(IllegalArgumentException.class);
+    }
+    
     
     @Test
     public void testTimeSheetPendingApprovalSubmitted() {

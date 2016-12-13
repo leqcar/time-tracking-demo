@@ -31,8 +31,8 @@ public class TimeSheetEventListener {
 		UserProfileEntry userProfile = userProfileRepository.getOne(event.getResourceId().getId());
 		PeriodEntry period = periodRepository.findOne(event.getTimePeriodId().getId());
 		
-		TimeSheetPeriodEntry timeSheetPeriodEntry = new TimeSheetPeriodEntry(period.getId(), 
-				period.getDescription(), null);
+		TimeSheetPeriodEntry timeSheetPeriodEntry = new TimeSheetPeriodEntry(period.getId().toString(), 
+				period.getDescription(), null, StatusId.UNSUBMITTED);
 		Resource resource = new Resource(userProfile.getUserIdentificationNumber(), userProfile.fullName());
 		
 		timeSheetRepository.save(new TimeSheetEntry(event.getTimeSheetId().toString()
