@@ -1,6 +1,11 @@
 package com.leqcar;
 
-import static java.util.stream.Collectors.toList;
+import com.leqcar.timetracking.api.timesheet.*;
+import com.leqcar.timetracking.domain.model.TimeSheet;
+import org.axonframework.test.aggregate.AggregateTestFixture;
+import org.axonframework.test.aggregate.FixtureConfiguration;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
@@ -12,25 +17,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.axonframework.test.aggregate.AggregateTestFixture;
-import org.axonframework.test.aggregate.FixtureConfiguration;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import com.leqcar.timetracking.api.timesheet.CreateTimeSheetCommand;
-import com.leqcar.timetracking.api.timesheet.ItemCommand;
-import com.leqcar.timetracking.api.timesheet.ItemDetail;
-import com.leqcar.timetracking.api.timesheet.ResourceId;
-import com.leqcar.timetracking.api.timesheet.SubmitTimeSheetCommand;
-import com.leqcar.timetracking.api.timesheet.TimePeriodId;
-import com.leqcar.timetracking.api.timesheet.TimeSheetCreatedEvent;
-import com.leqcar.timetracking.api.timesheet.TimeSheetId;
-import com.leqcar.timetracking.api.timesheet.TimeSheetSubmittedEvent;
-import com.leqcar.timetracking.domain.model.TimeSheet;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Created by jongtenerife on 04/12/2016.
